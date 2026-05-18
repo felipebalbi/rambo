@@ -32,9 +32,15 @@ use crate::io::{read_words, reset_and_halt, write_words};
 use crate::render::{class_cell, class_inline, header_cell, make_table, step};
 use crate::stability::print_stability;
 
-/// Run a full SRAM survey on `[start, end)` and return the most recent
-/// readback (the slice that callers like dual-pattern need to keep
-/// for further comparison).
+/// Result of one full survey pass on a region: the most recent
+/// readback (needed by dual-pattern) and the per-block
+/// classifications from that final readback.
+pub struct SurveyResult {
+    pub readback: Vec<u32>,
+    pub blocks: Vec<BlockResult>,
+}
+
+/// Run a full SRAM survey on `[start, end)`.
 pub fn full_sram_survey(
     s: &mut Session,
     start: u32,
@@ -42,7 +48,7 @@ pub fn full_sram_survey(
     block: u32,
     cycles: u32,
     invert_pattern: bool,
-) -> Result<Vec<u32>> {
+) -> Result<SurveyResult> {
     assert!(end > start, "end must be > start");
     assert!(
         (end - start).is_multiple_of(block),
@@ -96,7 +102,7 @@ pub fn full_sram_survey(
     let mut last_readback: Vec<u32> = Vec::new();
 
     for cycle in 1..=cycles {
-        if cycles > 1 {
+        if cycles > 1 && !crate::render::is_quiet() {
             println!();
             println!(
                 "{} {}",
@@ -112,7 +118,7 @@ pub fn full_sram_survey(
         let blocks = classify_all(start, block, n_blocks, words_per_block, &readback, &pattern);
         render_heatmap(start, block, &blocks);
 
-        if cycles > 1 {
+        if cycles > 1 && !crate::render::is_quiet() {
             let mut counts = [0usize; 4];
             for b in &blocks {
                 counts[b.class as usize] += 1;
@@ -141,7 +147,10 @@ pub fn full_sram_survey(
         print_stability(start, end, block, &per_cycle_classes);
     }
 
-    Ok(last_readback)
+    Ok(SurveyResult {
+        readback: last_readback,
+        blocks: last_blocks,
+    })
 }
 
 /// Survey heatmap: one cell per user-block, colored by its [`Class`].
@@ -170,8 +179,10 @@ pub fn render_heatmap(start: u32, block: u32, blocks: &[BlockResult]) {
 /// Collapse adjacent blocks with the same class into runs and print
 /// them as a table, then print per-class totals.
 fn print_runs_and_totals(blocks: &[BlockResult], end: u32, block: u32) {
-    // Collapse runs of identical-class neighbours.
     type Run = (u32, u32, Class, Option<(u32, u32, u32)>);
+    if crate::render::is_quiet() {
+        return;
+    }
     let mut runs: Vec<Run> = Vec::new();
     let mut run_start = blocks[0].addr;
     let mut run_class = blocks[0].class;

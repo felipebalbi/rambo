@@ -5,5 +5,6 @@ use rambo::Cli;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
-    Cli::parse().run()
+    let status = Cli::parse().run()?;
+    std::process::exit(status.code());
 }

@@ -53,6 +53,9 @@ pub fn render(
     color: impl Fn(usize) -> CellColor,
 ) {
     const COLS: usize = 64;
+    if crate::render::is_quiet() {
+        return;
+    }
     let row_bytes = COLS as u32 * cell_bytes;
     let n_rows = n_cells.div_ceil(COLS);
 
@@ -90,6 +93,9 @@ pub fn render(
 
 /// Print a single legend line. Each entry is `(color, label)`.
 pub fn legend(entries: &[(CellColor, &str)]) {
+    if crate::render::is_quiet() {
+        return;
+    }
     print!("  Legend: ");
     for (i, (c, label)) in entries.iter().enumerate() {
         if i > 0 {

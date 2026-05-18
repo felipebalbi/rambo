@@ -129,6 +129,8 @@ rambo --chip MCXA276 --probe 0483:374b
 | `--dual-pattern`     | off      | Two-pass `addr` / `!addr` sweep to distinguish undriven from modified RAM.                                   |
 | `--write-readback`   | off      | Write then immediately read back (no reset). Reveals aliasing / unmapped windows.                            |
 | `--probe <SEL>`      | first    | Probe selector, `VID:PID` or serial.                                                                         |
+| `--json <PATH>`      | off      | Write a machine-readable JSON report to `<PATH>` (use `-` for stdout, which suppresses normal text output).  |
+| `--expectations <PATH>` | off   | Load a "RAM contract" JSON file and evaluate each expectation against the survey. Non-zero exit on failure.  |
 
 Run `rambo --help` for the full clap-generated help text.
 
@@ -167,6 +169,43 @@ Totals
   SAFE:    236 KiB
   CHANGED:   4 KiB
 ```
+
+## CI gate: JSON output and RAM contracts
+
+`rambo` can emit a stable JSON report (`--json`) and evaluate a JSON
+**RAM contract** (`--expectations`) against the survey. Together they
+turn `rambo` from a one-off diagnostic into a regression gate that
+catches when a new chip rev, silicon lot, or ROM patch clobbers memory
+your firmware relies on.
+
+```sh
+rambo --chip MCXA276 \
+      --json report.json \
+      --expectations contract.json
+```
+
+Exit code is `0` if every expectation passes, `1` if any fails. Both
+flags are independent — use `--json` alone to archive a CI artifact,
+or `--expectations` alone for a pass/fail check.
+
+A contract file declares per-range expectations; see
+[`examples/expectations.json`](examples/expectations.json) for a
+worked example. Each expectation specifies exactly one clause:
+
+| Clause            | Meaning                                                  |
+|-------------------|----------------------------------------------------------|
+| `expect: "safe"`  | Every block in the range must classify as that class.    |
+| `expect_any_of: ["safe", "zero"]` | Every block must classify as one of these. |
+| `expect_not: "changed"` | No block in the range may classify as that class.  |
+
+Ranges must be block-aligned (`--block`) and fit entirely inside one
+of the chip's RAM regions; misalignment or out-of-region addresses
+are rejected *before* any probe I/O happens, so a typo can never
+brick a run.
+
+JSON output is wire-stable: `schema_version: 1` will keep its current
+shape, and breaking changes will bump the schema version alongside a
+release.
 
 ## Hardware notes
 

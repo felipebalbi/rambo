@@ -16,12 +16,15 @@
 //! - [`Class::Changed`] — none of the above; the block was modified in
 //!   some other way (e.g. trampolines, stacks, RAM-resident ROM code).
 
+use serde::{Deserialize, Serialize};
+
 /// Block classification.
 ///
 /// The discriminants are explicit so they can also be used as `usize`
 /// indices into small fixed-size count arrays (`[usize; 4]`).
 #[repr(usize)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Class {
     Safe = 0,
     Zero = 1,

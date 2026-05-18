@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "expectations": [
+    {
+      "name": "crash_dump_area",
+      "range": { "start": "0x20030000", "end": "0x20031000" },
+      "expect": "safe",
+      "rationale": "Reserved for crash-dump recovery after watchdog reset; must survive the boot ROM untouched."
+    },
+    {
+      "name": "rom_stack",
+      "range": { "start": "0x20000000", "end": "0x20001000" },
+      "expect_not": "safe",
+      "rationale": "Known ROM scratch / stack area; if this ever looks SAFE the ROM probably failed to run."
+    },
+    {
+      "name": "shared_buffer",
+      "range": { "start": "0x20010000", "end": "0x20011000" },
+      "expect_any_of": ["safe", "zero"],
+      "rationale": "Either preserved (warm reset) or cleanly zeroed (cold reset). Never garbage."
+    }
+  ]
+}

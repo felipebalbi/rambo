@@ -1,9 +1,14 @@
-//! Generic terminal output helpers: section headers, info lines,
-//! pre-styled `comfy-table` tables, and the colored cells used by every
-//! diagnostic.
-//!
-//! Keeping all styling in one module makes it easy to tweak the look of
-//! the entire tool from a single place.
+/// Generic terminal output helpers: section headers, info lines,
+/// pre-styled `comfy-table` tables, and the colored cells used by every
+/// diagnostic.
+///
+/// Keeping all styling in one module makes it easy to tweak the look of
+/// the entire tool from a single place.
+///
+/// All text printers honor a global "quiet" toggle: when JSON is being
+/// written to stdout we have to suppress every other stdout write so
+/// the JSON payload is parseable on its own. Set via [`set_quiet`].
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use comfy_table::presets::UTF8_FULL;
 use comfy_table::{Attribute, Cell, Color as TableColor, ContentArrangement, Table};
@@ -11,6 +16,20 @@ use owo_colors::OwoColorize;
 
 use crate::classify::Class;
 use crate::heatmap::CellColor;
+
+static QUIET: AtomicBool = AtomicBool::new(false);
+
+/// Suppress all text output produced by [`section`], [`step`],
+/// [`info_kv`], and any other helper that writes to stdout via this
+/// module. Used when JSON output is destined for stdout.
+pub fn set_quiet(quiet: bool) {
+    QUIET.store(quiet, Ordering::SeqCst);
+}
+
+/// True when stdout text output should be suppressed.
+pub fn is_quiet() -> bool {
+    QUIET.load(Ordering::SeqCst)
+}
 
 /// Map a [`Class`] to a `(table color, heatmap color, label)` triple.
 ///
@@ -34,6 +53,9 @@ pub fn class_color(class: Class) -> CellColor {
 /// Print a bold, cyan section title underlined with box-drawing
 /// dashes. Always emits a blank line first to separate sections.
 pub fn section(title: &str) {
+    if is_quiet() {
+        return;
+    }
     println!();
     println!("{}", title.bold().cyan());
     println!("{}", "─".repeat(title.chars().count()).bright_black());
@@ -41,11 +63,17 @@ pub fn section(title: &str) {
 
 /// Print a single progress line prefixed with a dim `›`.
 pub fn step(msg: &str) {
+    if is_quiet() {
+        return;
+    }
     println!("{} {}", "›".bright_black(), msg);
 }
 
 /// Print a `key: value` line where the key is dimmed.
 pub fn info_kv(key: &str, value: impl std::fmt::Display) {
+    if is_quiet() {
+        return;
+    }
     println!("  {} {}", format!("{key}:").dimmed(), value);
 }
 
