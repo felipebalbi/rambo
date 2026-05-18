@@ -1,0 +1,55 @@
+[package]
+name = "rambo"
+version = "0.1.0"
+edition = "2024"
+authors = ["Felipe Balbi <felipe@balbi.sh>"]
+description = "A tool to map ROM collateral damage"
+rust-version = "1.95"
+readme = "README.md"
+categories = ["command-line-utilities", "development-tools", ]
+keywords = ["cli", "utility", "sram", "clobber"]
+license = "MIT"
+repository = "https://github.com/felipebalbi/rambo"
+documentation = "https://docs.rs/rambo"
+
+[dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
+color-eyre = "0.6.5"
+comfy-table = "7.2.2"
+owo-colors = "4.3.0"
+parse_int = "0.9.0"
+probe-rs = "0.31.0"
+
+[lints.rust]
+unsafe_code = "forbid"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[lints.clippy]
+# Lint groups (priority -1 so individual lints below can override).
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+
+# Restriction lints we want as hard errors.
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+print_stderr = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+clone_on_ref_ptr = "deny"
+mem_forget = "deny"
+
+# Pedantic/cargo lints that are noisy or don't fit this project.
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_lossless = "allow"
+cast_precision_loss = "allow"
+must_use_candidate = "allow"
+similar_names = "allow"
+# Pulled in by transitive deps (probe-rs); can't fix locally.
+multiple_crate_versions = "allow"
+
