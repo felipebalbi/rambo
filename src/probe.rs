@@ -6,9 +6,10 @@
 
 use color_eyre::eyre::{Result, eyre};
 use owo_colors::OwoColorize;
-use probe_rs::config::MemoryRegion;
+use probe_rs::config::{MemoryRegion, Registry};
 use probe_rs::probe::list::Lister;
 use probe_rs::{Permissions, Session};
+use std::fs;
 
 use crate::cli::Cli;
 
@@ -52,7 +53,18 @@ pub fn open_session(cli: &Cli) -> Result<Session> {
     };
     println!("Using probe: {}", probe_info.identifier.bold());
     let probe = probe_info.open()?;
-    let session = probe.attach(cli.chip.clone(), Permissions::default())?;
+
+    let target = cli.chip.clone();
+
+    let session = if let Some(target_yaml) = cli.target_yaml.as_ref() {
+        let yaml_content = fs::read_to_string(target_yaml)?;
+        let mut registry = Registry::from_builtin_families();
+        registry.add_target_family_from_yaml(yaml_content.as_str())?;
+        probe.attach_with_registry(target, Permissions::default(), &registry)?
+    } else {
+        probe.attach(cli.chip.clone(), Permissions::default())?
+    };
+
     Ok(session)
 }
 
