@@ -52,9 +52,10 @@ pub struct Cli {
     #[arg(long)]
     pub probe: Option<String>,
 
-    /// Path to the target YAML file.
-    #[arg(long)]
-    pub target_yaml: Option<PathBuf>,
+    /// Path to a chip description YAML file (CMSIS-Pack style) to
+    /// load instead of the built-in probe-rs target database.
+    #[arg(long, value_name = "PATH")]
+    pub chip_description_path: Option<PathBuf>,
 
     /// Write a machine-readable JSON report of the survey results to
     /// PATH. Use `-` to write to stdout (which suppresses all normal

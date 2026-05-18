@@ -56,8 +56,8 @@ pub fn open_session(cli: &Cli) -> Result<Session> {
 
     let target = cli.chip.clone();
 
-    let session = if let Some(target_yaml) = cli.target_yaml.as_ref() {
-        let yaml_content = fs::read_to_string(target_yaml)?;
+    let session = if let Some(chip_description_path) = cli.chip_description_path.as_ref() {
+        let yaml_content = fs::read_to_string(chip_description_path)?;
         let mut registry = Registry::from_builtin_families();
         registry.add_target_family_from_yaml(yaml_content.as_str())?;
         probe.attach_with_registry(target, Permissions::default(), &registry)?
