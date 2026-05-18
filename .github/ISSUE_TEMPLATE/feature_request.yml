@@ -1,0 +1,58 @@
+name: Feature request
+description: Suggest a new capability for rambo
+title: "feat: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! Before filing, please skim the
+        README and open issues to make sure your idea isn't already
+        covered or in flight.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can you not do today? Describe the user-facing pain, not the implementation.
+      placeholder: "When triaging a regression I have to diff two text outputs by eye..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How should rambo behave? Sketch the CLI / JSON shape if relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches and why you ruled them out.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Does this touch the stable surface?
+      options:
+        - "New flag (additive — safe)"
+        - "Change to existing flag (breaking)"
+        - "New JSON field (additive — safe)"
+        - "Change to existing JSON field (breaking — bumps schema_version)"
+        - "Library API only"
+        - "Internal / non-user-visible"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: hardware
+    attributes:
+      label: Hardware
+      options:
+        - label: This feature can be implemented and tested without a probe.
+        - label: I have hardware I can use to test this and am willing to do so.

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/felipebalbi/rambo/discussions
+    about: For open-ended questions, please use Discussions rather than opening an issue.

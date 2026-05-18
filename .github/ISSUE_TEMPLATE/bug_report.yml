@@ -1,0 +1,101 @@
+name: Bug report
+description: Report something that rambo does wrong (wrong classification, crash, incorrect JSON, etc.)
+title: "bug: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug! Please fill in as much
+        of the form as you can — most bugs in `rambo` are
+        hardware-specific, so the chip / probe / host OS combination
+        matters a lot.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing what's wrong.
+      placeholder: e.g. "On MCXA276, the block at 0x20002000 is reported as CHANGED but a manual readback shows the pattern intact."
+    validations:
+      required: true
+
+  - type: input
+    id: rambo-version
+    attributes:
+      label: rambo version
+      description: Output of `rambo --version` (or git commit SHA if from source).
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: chip
+    attributes:
+      label: Target chip
+      description: probe-rs chip name and silicon revision if known.
+      placeholder: "MCXA276 / Rev A1"
+    validations:
+      required: true
+
+  - type: input
+    id: probe
+    attributes:
+      label: Debug probe
+      description: Probe model + firmware version. Include VID:PID if relevant.
+      placeholder: "MCU-Link Pro v3.119 (NXP)"
+    validations:
+      required: true
+
+  - type: input
+    id: host
+    attributes:
+      label: Host OS
+      placeholder: "Ubuntu 24.04 / macOS 14.5 / Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command line
+      description: The exact `rambo` invocation that triggered the bug.
+      render: shell
+      placeholder: rambo --chip MCXA276 --block 0x200 --fingerprint
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: Paste the relevant output. **If the bug is in JSON output, paste the JSON, not the colored text.** Redact serial numbers if needed.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+      description: What did you expect to see instead, and why?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Numbered steps. "It happens sometimes" is OK — say so and how often.
+      placeholder: |
+        1. Cold-boot the board.
+        2. Run `rambo --chip MCXA276`.
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Anything else — `RUST_LOG` output, `probe-rs info` dump, photo of the board, datasheet excerpts, related issues.
