@@ -65,3 +65,19 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --all-targets --all-features --verbose
       - run: cargo test --all-features --verbose
+
+  semver-checks:
+    name: SemVer checks
+    runs-on: ubuntu-latest
+    # Only meaningful on PRs: there is no useful baseline when pushing
+    # straight to main (we'd compare main against itself).
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install probe-rs system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libudev-dev pkg-config
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: obi1kenobi/cargo-semver-checks-action@v2
