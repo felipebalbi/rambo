@@ -5,6 +5,12 @@ on:
     tags:
       - 'v*'
 
+# Tagged release runs are inherently unique per tag, but we still
+# group by tag to be safe (and keep the same pattern as ci.yml).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -14,6 +20,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
+      # All four target builds run in parallel.
+      max-parallel: 4
       matrix:
         include:
           - os: ubuntu-latest

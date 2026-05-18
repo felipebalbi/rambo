@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+# Cancel older in-flight runs for the same branch/PR. Stops a fresh
+# push from sitting behind an obsolete run that's still consuming
+# runners (which is the most common cause of perceived "serial"
+# execution).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-D warnings"
@@ -41,6 +49,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
+      # Run all three OS variants in parallel. Locked in explicitly so
+      # a future matrix expansion can't silently cap concurrency.
+      max-parallel: 3
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
