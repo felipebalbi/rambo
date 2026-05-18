@@ -134,12 +134,12 @@ Run `rambo --help` for the full clap-generated help text.
 
 ## Classification legend
 
-| Class   | Glyph    | Meaning                                                     |
-|---------|----------|-------------------------------------------------------------|
-| SAFE    | █ green  | Pattern survived. ROM did not touch this block.             |
-| ZERO    | █ red    | Block was cleared to `0x00000000`.                          |
-| ONES    | █ red    | Block was filled with `0xFFFFFFFF`.                         |
-| CHANGED | █ yellow | Block was rewritten with something else (ROM working data). |
+| Class   | Glyph     | Meaning                                                     |
+|---------|-----------|-------------------------------------------------------------|
+| SAFE    | █ green   | Pattern survived. ROM did not touch this block.             |
+| ZERO    | █ blue    | Block was cleared to `0x00000000`.                          |
+| ONES    | █ magenta | Block was filled with `0xFFFFFFFF`.                         |
+| CHANGED | █ red     | Block was rewritten with something else (ROM working data). |
 
 The heatmap is laid out as **64 cells per row**, where each cell aggregates one
 block (1 KiB for the survey heatmap, `--block` bytes elsewhere). Below the
