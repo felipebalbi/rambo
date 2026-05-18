@@ -18,6 +18,13 @@ jobs:
   build:
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    # softprops/action-gh-release needs write access to create/update
+    # the release and upload assets. The default GITHUB_TOKEN is
+    # read-only when the repo's "Workflow permissions" setting is
+    # "Read repository contents permission" (the default for repos
+    # created since Feb 2023).
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       # All four target builds run in parallel.
