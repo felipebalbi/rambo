@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "expectations": [
+    {
+      "name": "main_sram_crash_dump_area",
+      "range": { "start": "0x20030000", "end": "0x20031000" },
+      "expect": "safe",
+      "rationale": "Reserved for crash-dump recovery after watchdog reset. Must survive the boot ROM untouched."
+    },
+    {
+      "name": "main_sram_persistent_config",
+      "range": { "start": "0x20020000", "end": "0x20024000" },
+      "expect": "safe",
+      "rationale": "Holds the persistent device-config blob the bootloader hands off to the app."
+    },
+    {
+      "name": "main_sram_app_heap",
+      "range": { "start": "0x20001000", "end": "0x20010000" },
+      "expect_any_of": ["safe", "zero"],
+      "rationale": "Application heap region: either preserved (warm reset) or cleanly zeroed (cold reset), never garbage."
+    },
+    {
+      "name": "sramx1_upper_safe_window",
+      "range": { "start": "0x04003000", "end": "0x04004000" },
+      "expect": "safe",
+      "rationale": "Empirically untouched upper half of SRAMX1, usable for small tightly-coupled scratch."
+    },
+    {
+      "name": "sramx1_rom_stack_area",
+      "range": { "start": "0x04002000", "end": "0x04003000" },
+      "expect_not": "safe",
+      "rationale": "Known ROM scratch/stack window. If this ever looked SAFE the ROM probably failed to run."
+    }
+  ]
+}

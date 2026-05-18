@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "expectations": [
+    {
+      "name": "wrong_sramx0_must_be_safe",
+      "range": { "start": "0x04000000", "end": "0x04002000" },
+      "expect": "safe",
+      "rationale": "Deliberately wrong: SRAMX0 is actually CHANGED on this ROM, so this should fail."
+    },
+    {
+      "name": "wrong_main_sram_must_be_zero",
+      "range": { "start": "0x20000000", "end": "0x20004000" },
+      "expect": "zero",
+      "rationale": "Deliberately wrong: main SRAM survives intact, so SAFE != ZERO -> should fail."
+    },
+    {
+      "name": "wrong_sramx1_must_not_be_changed",
+      "range": { "start": "0x04002000", "end": "0x04003000" },
+      "expect_not": "changed",
+      "rationale": "Deliberately wrong: SRAMX1 lower half IS the ROM scratch area -> should fail."
+    },
+    {
+      "name": "correct_sramx1_upper_safe",
+      "range": { "start": "0x04003000", "end": "0x04004000" },
+      "expect": "safe",
+      "rationale": "Sanity check: this one should still pass to prove the evaluator handles mixed results."
+    }
+  ]
+}
