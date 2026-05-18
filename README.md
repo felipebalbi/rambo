@@ -192,9 +192,44 @@ CI runs the same three checks on every push and PR (Ubuntu/macOS/Windows for
 tests, Ubuntu for lints). The CI badges at the top of this README reflect the
 current status of `main`.
 
+### Commit convention
+
+Commits to `main` MUST follow [Conventional Commits]. `release-plz` parses
+them to compute the next version bump and to generate `CHANGELOG.md`.
+Non-conforming commits default to a patch bump and won't appear in the
+changelog cleanly.
+
+Bump rules differ between `0.x` and `1.x` (per the [`next_version`] crate
+that release-plz uses):
+
+| Commit                                  | `0.x` bump | `≥1.0` bump |
+|-----------------------------------------|------------|-------------|
+| `fix:` / `perf:` / `feat:`              | patch      | patch / patch / minor |
+| `feat!:` or `BREAKING CHANGE:` footer   | minor      | major       |
+| non-conventional                        | patch      | patch       |
+
+On `0.x` the minor digit *is* the breaking axis (per Cargo's semver
+rules), so `feat:` deliberately stays on the patch line until you bump
+to `1.0.0` manually.
+
+### Releases
+
+Releases are automated via [release-plz]:
+
+1. Merging conventional commits to `main` causes release-plz to open (or
+   update) a **"chore: release"** PR that bumps `Cargo.toml` and updates
+   `CHANGELOG.md`.
+2. Merging that PR tags `vX.Y.Z`, creates a GitHub Release, and publishes
+   to crates.io.
+3. The tag also triggers `release.yml`, which builds per-OS binary
+   archives and uploads them onto the same GitHub Release.
+
 ## License
 
 [MIT](LICENSE) © Felipe Balbi
 
 [probe-rs]: https://probe.rs
 [Releases page]: https://github.com/felipebalbi/rambo/releases
+[Conventional Commits]: https://www.conventionalcommits.org/
+[release-plz]: https://release-plz.dev
+[`next_version`]: https://docs.rs/next_version

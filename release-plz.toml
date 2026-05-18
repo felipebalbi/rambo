@@ -1,0 +1,11 @@
+# release-plz configuration
+# https://release-plz.dev/docs/config
+
+[[package]]
+name = "rambo"
+changelog_update = true
+git_release_enable = true
+publish = true
+# Semver enforcement lives in ci.yml's `semver-checks` job so it
+# triggers on every PR, not only the release PR.
+semver_check = false
