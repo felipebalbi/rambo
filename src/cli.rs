@@ -6,6 +6,7 @@
 
 use clap::Parser;
 use color_eyre::eyre::{Result, eyre};
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "A tool to map ROM collateral damage")]
@@ -50,6 +51,10 @@ pub struct Cli {
     /// first probe found.
     #[arg(long)]
     pub probe: Option<String>,
+
+    /// Path to the target YAML file.
+    #[arg(long)]
+    pub target_yaml: Option<PathBuf>,
 }
 
 impl Cli {
