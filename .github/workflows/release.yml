@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*'
+  # Allow manual re-runs against an existing tag. Useful when a tag
+  # was pushed by GITHUB_TOKEN (e.g. by release-plz), which does not
+  # trigger the `push: tags:` event. Select the tag in the "Use
+  # workflow from" dropdown when dispatching.
+  workflow_dispatch:
 
 # Tagged release runs are inherently unique per tag, but we still
 # group by tag to be safe (and keep the same pattern as ci.yml).
