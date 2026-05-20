@@ -13,6 +13,9 @@ jobs:
     permissions:
       contents: write
       pull-requests: read
+    outputs:
+      releases_created: ${{ steps.release-plz.outputs.releases_created }}
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,12 +29,42 @@ jobs:
           sudo apt-get install -y libudev-dev pkg-config
       - uses: dtolnay/rust-toolchain@stable
       - name: Run release-plz
+        id: release-plz
         uses: release-plz/action@v0.5
         with:
           command: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Extract released tag
+        id: tag
+        if: steps.release-plz.outputs.releases_created == 'true'
+        shell: bash
+        env:
+          RELEASES_JSON: ${{ steps.release-plz.outputs.releases }}
+        run: |
+          # Single-package repo: pick the first release's tag.
+          tag="$(echo "$RELEASES_JSON" | jq -r '.[0].tag')"
+          if [[ -z "$tag" || "$tag" == "null" ]]; then
+            echo "::error::releases_created==true but could not extract tag from: $RELEASES_JSON" >&2
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Released tag: $tag"
+
+  # Build per-OS binaries and upload them to the GitHub Release that
+  # release-plz just created. Skipped on no-op runs (commits that
+  # don't produce a new release).
+  release-binaries:
+    name: Release binaries
+    needs: release-plz-release
+    if: needs.release-plz-release.outputs.releases_created == 'true'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.release-plz-release.outputs.tag }}
+    secrets: inherit
 
   # Open / update the "Release X.Y.Z" PR that bumps Cargo.toml and
   # updates CHANGELOG.md from conventional commits.

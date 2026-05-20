@@ -1,19 +1,29 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
-  # Allow manual re-runs against an existing tag. Useful when a tag
-  # was pushed by GITHUB_TOKEN (e.g. by release-plz), which does not
-  # trigger the `push: tags:` event. Select the tag in the "Use
-  # workflow from" dropdown when dispatching.
+  # Called inline from the Release-plz workflow after a tag is
+  # created and the GitHub Release is published. The caller passes
+  # the tag explicitly because `github.ref_name` is `main` when this
+  # workflow is invoked via `workflow_call` from a push to main.
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Tag to build and upload assets for (e.g. v0.1.1)'
+        required: true
+        type: string
+  # Manual re-run path: select an existing tag in the "Use workflow
+  # from" dropdown to rebuild and re-upload binaries for it.
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Optional tag override. If empty, uses the ref selected above.'
+        required: false
+        type: string
 
-# Tagged release runs are inherently unique per tag, but we still
-# group by tag to be safe (and keep the same pattern as ci.yml).
+# Group by tag so concurrent invocations for the same tag queue
+# rather than race; different tags run independently.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 env:
@@ -49,7 +59,23 @@ jobs:
             target: aarch64-apple-darwin
             archive: tar.gz
     steps:
+      - name: Resolve tag
+        id: tag
+        shell: bash
+        run: |
+          tag="${{ inputs.tag || github.ref_name }}"
+          if [[ -z "$tag" ]]; then
+            echo "::error::No tag could be resolved from inputs.tag or github.ref_name" >&2
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v4
+        with:
+          # Build the source at the released tag, not the workflow's
+          # caller ref (which is `main` when invoked from release-plz).
+          ref: ${{ steps.tag.outputs.tag }}
 
       - name: Install probe-rs system dependencies (Linux)
         if: runner.os == 'Linux'
@@ -72,7 +98,7 @@ jobs:
         if: matrix.archive == 'tar.gz'
         shell: bash
         run: |
-          name="rambo-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          name="rambo-${TAG}-${{ matrix.target }}"
           mkdir "$name"
           cp "target/${{ matrix.target }}/release/rambo" "$name/"
           cp README.md LICENSE "$name/" 2>/dev/null || true
@@ -83,7 +109,7 @@ jobs:
         if: matrix.archive == 'zip'
         shell: pwsh
         run: |
-          $name = "rambo-$env:GITHUB_REF_NAME-${{ matrix.target }}"
+          $name = "rambo-$env:TAG-${{ matrix.target }}"
           New-Item -ItemType Directory -Path $name | Out-Null
           Copy-Item "target/${{ matrix.target }}/release/rambo.exe" "$name/"
           if (Test-Path README.md) { Copy-Item README.md "$name/" }
@@ -94,5 +120,6 @@ jobs:
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.tag.outputs.tag }}
           files: ${{ env.ASSET }}
           generate_release_notes: true
