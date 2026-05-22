@@ -71,7 +71,7 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "TAG=$tag" >> "$GITHUB_ENV"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # Build the source at the released tag, not the workflow's
           # caller ref (which is `main` when invoked from release-plz).
