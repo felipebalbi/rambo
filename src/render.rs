@@ -82,7 +82,7 @@ pub fn info_kv(key: &str, value: impl std::fmt::Display) {
 /// so widths follow the current terminal).
 pub fn make_table() -> Table {
     let mut t = Table::new();
-    t.load_preset(UTF8_FULL)
+    t.load_style(UTF8_FULL)
         .set_content_arrangement(ContentArrangement::Dynamic);
     t
 }
