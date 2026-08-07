@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2](https://github.com/felipebalbi/rambo/compare/v0.1.1...v0.1.2) - 2026-08-07
+
+### Other
+
+- *(deps)* bump dependencies
+- add dependabot configuration
+- chain release binaries from release-plz workflow
+- allow manual dispatch of release workflow
+
 - Update dependencies
 
 ## [0.1.1](https://github.com/felipebalbi/rambo/compare/v0.1.0...v0.1.1) - 2026-05-18
